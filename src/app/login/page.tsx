@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'
-
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react'; 
 
 const LoginPage: React.FC = () => {
   const [username, setusername] = useState('');
@@ -12,26 +12,33 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}user/login/`
-        // "http://127.0.0.1:8000/user/login/"
-        
-
-        , {
-            username :  username,
-            password,
-      });
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}user/login/`,
+        {
+          username: username,
+          password,
+        }
+      );
       console.log(response.data);
     
-    //   router.push('/dashboard'); 
+      // router.push('/dashboard');
     } catch (err) {
       setError('Invalid username or password');
     }
   };
+
+  const handleGoogleLogin = async () => {
+    const result = await signIn('google', { redirect: false });
+    console.log(result , "resukt");
+    if (result?.error) {
+        setError("Google sign-in failed. Please try again.");
+    } else {
+        router.push('/dashboard'); // Redirect after successful sign-in
+    }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -40,7 +47,7 @@ const LoginPage: React.FC = () => {
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">username</label>
+            <label htmlFor="username" className="block text-gray-700">Username</label>
             <input
               type="text"
               id="username"
@@ -68,6 +75,12 @@ const LoginPage: React.FC = () => {
             Login
           </button>
         </form>
+        <button
+          onClick={handleGoogleLogin} // Handle Google login
+          className="w-full mt-4 px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600"
+        >
+          Sign in with Google
+        </button>
         <p className="text-center mt-4">
           Don't have an account? <Link href="/register" className="text-blue-500 hover:underline">Register here</Link>
         </p>
