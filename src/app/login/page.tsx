@@ -17,8 +17,8 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        // `${process.env.BACKEND_URL}user/login/`
-        "http://127.0.0.1:8000/user/login/"
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}user/login/`
+        // "http://127.0.0.1:8000/user/login/"
         
 
         , {
@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
             password,
       });
       console.log(response.data);
-    //   localStorage.setItem('token', response.data.token);
+    
     //   router.push('/dashboard'); 
     } catch (err) {
       setError('Invalid username or password');

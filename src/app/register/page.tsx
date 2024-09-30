@@ -16,8 +16,8 @@ const RegisterPage: React.FC = () => {
         e.preventDefault();
         try {
             const response = await axios.post(
-                // `${process.env.BACKEND_URL}user/register/`
-                'http://127.0.0.1:8000/user/register/'
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}user/register/`
+                // 'http://127.0.0.1:8000/user/register/'
                 , {
                 username,
                 password,
