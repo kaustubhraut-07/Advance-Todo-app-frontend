@@ -43,9 +43,6 @@ const handleGoogleLogin = async () => {
   }
 };
 
-
-
-
 useEffect(() => {
   if (session) {
     router.push('/dashboard'); 
