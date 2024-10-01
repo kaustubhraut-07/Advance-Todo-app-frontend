@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react'; 
 
 const LoginPage: React.FC = () => {
-  const [username, setusername] = useState('');
+  const [email, setemail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
@@ -18,27 +18,29 @@ const LoginPage: React.FC = () => {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}user/login/`,
         {
-          username: username,
+          email:email ,
           password,
         }
       );
       console.log(response.data);
-    
-      // router.push('/dashboard');
+      router.push('/dashboard'); 
     } catch (err) {
-      setError('Invalid username or password');
+      setError('Invalid email or password');
     }
   };
+  
 
-  const handleGoogleLogin = async () => {
-    const result = await signIn('google', { redirect: false });
-    console.log(result , "resukt");
-    if (result?.error) {
-        setError("Google sign-in failed. Please try again.");
-    } else {
-        router.push('/dashboard'); // Redirect after successful sign-in
-    }
+
+const handleGoogleLogin = async () => {
+  const result = await signIn('google', { redirect: false });
+  console.log(result, "result");
+  if (result?.error) {
+    setError("Google sign-in failed. Please try again.");
+  } else {
+    router.push('/dashboard'); 
+  }
 };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -47,13 +49,13 @@ const LoginPage: React.FC = () => {
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">Username</label>
+            <label htmlFor="email" className="block text-gray-700">email</label>
             <input
               type="text"
-              id="username"
+              id="email"
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={username}
-              onChange={(e) => setusername(e.target.value)}
+              value={email}
+              onChange={(e) => setemail(e.target.value)}
               required
             />
           </div>

@@ -20,29 +20,28 @@ export interface CustomUser {
     password?: string | null;
 }
 
-const LOGIN_URL = 'http://127.0.0.1:8000/user/login/';
-
-// console.log(process.env.GOOGLE_CLIENT_ID , process.env.GOOGLE_CLIENT_SECRET , "secreats"); 
+const LOGIN_URL = 'http://127.0.0.1:8000/user/google-login/';
 
 export const authOptions: AuthOptions = {
     secret: process.env.NEXTAUTH_SECRET || 'your-random-secret-here',
     pages: {
-        signIn: "/",
+        signIn: "/login",
     },
     callbacks: {
        
 
         async signIn({ user, account }: { user: CustomUser; account: Account | null }) {
             try {
-                if (account?.provider === 'google') {
+                if (account?.provider === 'google' && account.id_token) {
                     const payload = {
                         email: user.email!,
                         name: user.name!,
                         oauth_id: account.providerAccountId!,
                         provider: account.provider!,
                         image: user?.image,
+                        token: account.id_token, // Get the actual id_token from Google
                     };
-    
+        
                     const { data } = await axios.post(LOGIN_URL, payload);
                     user.id = data?.user?.id?.toString();
                     user.token = data?.user?.token;
@@ -57,6 +56,7 @@ export const authOptions: AuthOptions = {
             return false; // Ensure a fallback return value
         },
 
+
         async jwt({ token, user }) {
             if (user) {
                 token.user = user;
@@ -64,10 +64,10 @@ export const authOptions: AuthOptions = {
             return token;
         },
 
-        async session({ session, token }) {
-            session.user = token.user as CustomUser;
-            return session;
-        },
+        // async session({ session, token }) {
+        //     session.user = token.user as CustomUser;
+        //     return session;
+        // },
     },
 
     providers: [
@@ -83,4 +83,5 @@ export const authOptions: AuthOptions = {
             },
         }),
     ],
+    
 };
