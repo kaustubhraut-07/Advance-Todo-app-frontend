@@ -46,14 +46,14 @@ export const authOptions: AuthOptions = {
                     user.id = data?.user?.id?.toString();
                     user.token = data?.user?.token;
                     user.provider = data?.user?.provider;
-                    return true; // Successful sign-in
+                    return true; 
                 }
-                // Logic for username/password sign-in can be added here
+               
             } catch (error) {
                 console.error("SignIn Error:", error);
-                return false; // Always return false in case of error
+                return false; 
             }
-            return false; // Ensure a fallback return value
+            return false; 
         },
 
 
