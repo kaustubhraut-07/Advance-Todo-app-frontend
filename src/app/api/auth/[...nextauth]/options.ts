@@ -39,7 +39,7 @@ export const authOptions: AuthOptions = {
                         oauth_id: account.providerAccountId!,
                         provider: account.provider!,
                         image: user?.image,
-                        token: account.id_token, // Get the actual id_token from Google
+                        token: account.id_token, 
                     };
         
                     const { data } = await axios.post(LOGIN_URL, payload);

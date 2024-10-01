@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 const Navbar: React.FC = () => {
   const { data: session } = useSession();
@@ -27,6 +27,14 @@ console.log(session , "session");
         
         <div className="flex-grow text-center">
           <h1 className="text-2xl font-bold">Advanced Todos App</h1>
+        </div>
+
+        <div>
+          <button 
+          onClick={()=>signOut({ callbackUrl: '/login' })}
+          >
+            Log Out
+          </button>
         </div>
       </div>
     </nav>
