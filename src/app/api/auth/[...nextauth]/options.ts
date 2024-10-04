@@ -43,6 +43,10 @@ export const authOptions: AuthOptions = {
                     };
         
                     const { data } = await axios.post(LOGIN_URL, payload);
+                    if (data.error) {
+                        console.error("Backend error:", data.error);
+                        return false;
+                    }
                     user.id = data?.user?.id?.toString();
                     user.token = data?.user?.token;
                     user.provider = data?.user?.provider;
