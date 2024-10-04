@@ -36,17 +36,17 @@ const DashboardPage: React.FC = () => {
   const handleEdit = (id: number) => {
     const todo = todos.find(t => t.id === id);
     console.log(todo,"todo");
-    if (todo) {
-      router.push({
-        pathname: '/edittodo',
-        query: {
-          pid: todo.id,
-          title: todo.title,
-          description: todo.description,
-          completed: todo.completed,
-        }
-      });
-    }
+    // if (todo) {
+    //   router.push({
+    //     pathname: '/edittodo',
+    //     query: {
+    //       pid: todo.id,
+    //       title: todo.title,
+    //       description: todo.description,
+    //       completed: todo.completed,
+    //     }
+    //   });
+    // }
     console.log(`Edit Todo with id: ${id}`);
   };
 
@@ -61,11 +61,17 @@ const DashboardPage: React.FC = () => {
     console.log(`Delete Todo with id: ${id}`);
   };
 
+  const handleCreateTodos = () => {
+    router.push('/createtodo');
+  }
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="container mx-auto px-4 py-8">
+        <div className='flex justify-between items-center mb-4'>
         <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
+        <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" onClick={handleCreateTodos}>Create Todo</button>
+        </div>
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-100">
