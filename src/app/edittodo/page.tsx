@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 interface Todo {
   id: number;
   title: string;
@@ -24,6 +25,9 @@ const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [completed, setCompleted] = useState(false);
+
+
+  const notify = () => toast("Todo Edited Successfully!");
 
   useEffect(() => {
     const id = searchParams.id;
@@ -52,6 +56,7 @@ const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
     
     try {
       await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}todo/updatetodo/${todo.id}/`, updatedTodo);
+      notify();
       router.push('/dashboard');
     } catch (error) {
       console.error('Error updating todo:', error);
@@ -118,6 +123,7 @@ const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
           <p>Editing as: {session.user.name}</p>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

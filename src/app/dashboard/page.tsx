@@ -5,7 +5,8 @@ import axios from 'axios';
 import Navbar from '../navbar/page';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 interface Todo {
   id: number;
   title: string;
@@ -70,7 +71,7 @@ const DashboardPage: React.FC = () => {
     console.log(`Edit Todo with id: ${id}`);
   };
 
-  
+
   const handleDelete = async(id: number) => {
     // Handle delete functionality
     try {
