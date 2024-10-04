@@ -1,31 +1,66 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 interface Todo {
-  id: number; // Replace with the actual ID type if different
+  id: number;
   title: string;
   description: string;
   completed: boolean;
 }
 
-interface EditTodoProps {
-  todo: Todo; // Pass the todo item to edit as a prop
-  onUpdate: (updatedTodo: Todo) => void; // Callback function to handle the update
+interface PageProps {
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-const EditTodo: React.FC<EditTodoProps> = ({ todo, onUpdate }) => {
-//   const { data: session } = useSession();
-  const [title, setTitle] = useState(todo.title);
-  const [description, setDescription] = useState(todo.description);
-  const [completed, setCompleted] = useState(todo.completed);
+const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
+  const { data: session } = useSession();
+  const router = useRouter();
+  
+  const [todo, setTodo] = useState<Todo | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [completed, setCompleted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const id = searchParams.id;
+    const title = searchParams.title;
+    const description = searchParams.description;
+    const completed = searchParams.completed;
+
+    if (id && title && description) {
+      setTodo({
+        id: Number(id),
+        title: String(title),
+        description: String(description),
+        completed: completed === 'true',
+      });
+      setTitle(String(title));
+      setDescription(String(description));
+      setCompleted(completed === 'true');
+    }
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!todo) return;
+
     const updatedTodo = { ...todo, title, description, completed };
-    onUpdate(updatedTodo); // Call the onUpdate callback with the updated todo
+    
+    try {
+      await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}todo/updatetodo/${todo.id}/`, updatedTodo);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
   };
+
+  if (!todo) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-lg mx-auto mt-10 p-5 border rounded-lg shadow-lg bg-white">

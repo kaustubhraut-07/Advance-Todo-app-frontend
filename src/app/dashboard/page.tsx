@@ -33,23 +33,44 @@ const DashboardPage: React.FC = () => {
     fetchTodos();
   }, [Session?.user?.email]);
 
+  // const handleEdit = (id: number) => {
+  //   const todo = todos.find(t => t.id === id);
+  //   console.log(todo,"todo");
+  //   if (todo) {
+  //     router.push({
+  //       pathname: '/edittodo',
+  //       state : {
+
+  //       }
+  //       // query: {
+  //       //   pid: todo.id,
+  //       //   title: todo.title,
+  //       //   description: todo.description,
+  //       //   completed: todo.completed,
+  //       // }
+  //     });
+  //   }
+  //   console.log(`Edit Todo with id: ${id}`);
+  // };
+
+
   const handleEdit = (id: number) => {
     const todo = todos.find(t => t.id === id);
-    console.log(todo,"todo");
-    // if (todo) {
-    //   router.push({
-    //     pathname: '/edittodo',
-    //     query: {
-    //       pid: todo.id,
-    //       title: todo.title,
-    //       description: todo.description,
-    //       completed: todo.completed,
-    //     }
-    //   });
-    // }
+    console.log(todo, "todo");
+    if (todo) {
+      const queryParams = new URLSearchParams({
+        id: todo.id.toString(),
+        title: todo.title,
+        description: todo.description,
+        completed: todo.completed.toString(),
+      }).toString();
+
+      router.push(`/edittodo?${queryParams}`);
+    }
     console.log(`Edit Todo with id: ${id}`);
   };
 
+  
   const handleDelete = async(id: number) => {
     // Handle delete functionality
     try {
