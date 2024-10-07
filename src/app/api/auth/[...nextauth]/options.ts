@@ -8,6 +8,7 @@ import axios, { AxiosError } from "axios";
 export interface CustomSession {
     user?: CustomUser;
     expires: ISODateString;
+    accessToken?: string;
 };
 
 export interface CustomUser {
@@ -18,6 +19,7 @@ export interface CustomUser {
     provider?: string | null;
     token?: string | null;
     password?: string | null;
+
 }
 
 const LOGIN_URL = 'http://127.0.0.1:8000/user/google-login/';
@@ -61,17 +63,26 @@ export const authOptions: AuthOptions = {
         },
 
 
-        async jwt({ token, user }) {
+        async jwt({ token, user,account }) {
+            // console.log(token,"user" , token.sub )
             if (user) {
                 token.user = user;
+                // token.accessToken = accessToken;
+
             }
+            // console.log(account , "account")
+            if (account?.access_token) {
+                token.accessToken = account.access_token;
+            }
+            
             return token;
         },
 
-        // async session({ session, token }) {
-        //     session.user = token.user as CustomUser;
-        //     return session;
-        // },
+        async session({ session, token }) {
+            session.user = token.user as CustomUser;
+            session.accessToken = token.accessToken;
+            return session;
+        },
     },
 
     providers: [
