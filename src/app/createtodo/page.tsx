@@ -146,9 +146,9 @@ const page = () => {
             summary: 'Meeting',
             location: 'New York',
             description: 'Discuss project updates',
-            start: '2024-12-28T09:00:00-07:00',
-            end: '2024-12-28T17:00:00-07:00',
-            attendees: [{ email: 'attendee1@example.com' }, { email: 'attendee2@example.com' }],
+            start: '2024-10-07T17:00:00-07:00',
+            end: '2024-10-07T17:00:00-08:00',
+            attendees: [{ email: 'kaustubhr2001@gmail.com' }, { email: 'kaustubh.raut@fxis.ai' }],
         }),
     });
 
@@ -201,11 +201,13 @@ const page = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200"
+          className="w-full bg-blue-500 text-white p-2 m-2 rounded hover:bg-blue-600 transition duration-200"
         >
           Create Todo
         </button>
-        <button onClick={handleAddToGoogleCalendar}>
+        <button onClick={handleAddToGoogleCalendar}
+        className="w-full bg-blue-500 text-white p-2 m-2 rounded hover:bg-blue-600 transition duration-200 "
+>
           Google Calender
         </button>
       </form>
