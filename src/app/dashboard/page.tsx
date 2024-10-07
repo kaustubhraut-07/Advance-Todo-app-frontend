@@ -129,25 +129,6 @@ const DashboardPage: React.FC = () => {
     fetchTodos();
   }, [Session?.user?.email]);
 
-  // const handleEdit = (id: number) => {
-  //   const todo = todos.find(t => t.id === id);
-  //   console.log(todo,"todo");
-  //   if (todo) {
-  //     router.push({
-  //       pathname: '/edittodo',
-  //       state : {
-
-  //       }
-  //       // query: {
-  //       //   pid: todo.id,
-  //       //   title: todo.title,
-  //       //   description: todo.description,
-  //       //   completed: todo.completed,
-  //       // }
-  //     });
-  //   }
-  //   console.log(`Edit Todo with id: ${id}`);
-  // };
 
 
 
@@ -248,11 +229,14 @@ const DashboardPage: React.FC = () => {
           </tbody>
         </table>
         <div className="flex justify-center mt-4">
-          <button
+          
+          {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => (
+            <>
+            <button
             className={`px-3 py-1 mx-1 ${currentpage === 1 ? 'bg-gray-200' : 'bg-blue-500 text-white'}`}
             onClick={() => currentpage > 1 && setCurrentpage(currentpage - 1)}
           >Previous</button>
-          {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => (
+          
             <button
               key={index}
               onClick={() => paginate(index + 1)}
@@ -260,11 +244,13 @@ const DashboardPage: React.FC = () => {
             >
               {index + 1}
             </button>
-          ))}
-          <button 
+            <button 
             className={`px-3 py-1 mx-1 ${currentpage === Math.ceil(filtertodos.length / itemsPerPage) ? 'bg-gray-200' : 'bg-blue-500 text-white'}`}
            onClick={() => currentpage < Math.ceil(filtertodos.length / itemsPerPage) && setCurrentpage(currentpage + 1)}
           >Next</button>
+            </>
+          ))}
+         
         </div>
       </div>
     </div>
