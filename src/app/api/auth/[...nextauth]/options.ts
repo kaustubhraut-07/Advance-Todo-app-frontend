@@ -1,4 +1,4 @@
-// lib/authOptions.ts
+
 
 import { Account, AuthOptions, ISODateString, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
@@ -100,3 +100,7 @@ export const authOptions: AuthOptions = {
     ],
     
 };
+
+
+
+

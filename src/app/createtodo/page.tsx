@@ -103,38 +103,62 @@ const page = () => {
   // };
 
             
-  const handleAddToGoogleCalendar = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleAddToGoogleCalendar = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    if (!Session ) {
-      console.error('User is not authenticated');
-      return;
-    }
-    console.log(Session.accessToken , "123123123");
+  //   if (!Session ) {
+  //     console.error('User is not authenticated');
+  //     return;
+  //   }
+  //   console.log(Session.accessToken , "123123123");
 
-    try {
-      const response = await fetch('/api/addtogooglecalendar', {
+  //   try {
+  //     const response = await fetch('/api/addtogooglecalendar', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         todo :testing,
+  //         accessToken: Session.accessToken
+  //         ,
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       alert('Event added to Google Calendar: ' + data.eventLink);
+  //     } else {
+  //       console.error('Error:', data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error adding event to Google Calendar:', error);
+  //   }
+  // };
+
+  async function handleAddToGoogleCalendar() {
+    const response = await fetch('/api/addtogooglecalendar', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          todo :testing,
-          accessToken: Session.accessToken
-          ,
+            summary: 'Meeting',
+            location: 'New York',
+            description: 'Discuss project updates',
+            start: '2024-12-28T09:00:00-07:00',
+            end: '2024-12-28T17:00:00-07:00',
+            attendees: [{ email: 'attendee1@example.com' }, { email: 'attendee2@example.com' }],
         }),
-      });
+    });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert('Event added to Google Calendar: ' + data.eventLink);
-      } else {
-        console.error('Error:', data.error);
-      }
-    } catch (error) {
-      console.error('Error adding event to Google Calendar:', error);
+    const data = await response.json();
+    if (data.message === 'Event created') {
+        console.log('Event created successfully:', data.link);
+    } else {
+        console.error('Error creating event:', data.error);
     }
-  };
+}
   
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
