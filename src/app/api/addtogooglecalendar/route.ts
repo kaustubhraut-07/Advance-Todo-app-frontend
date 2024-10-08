@@ -43,11 +43,11 @@ export async function POST(req : NextRequest) {
             location: '800 Howard St., San Francisco, CA 94103',
             description: 'A chance to hear more about Google\'s developer products.',
             start: {
-                dateTime: '2024-10-07T17:00:00-07:00',
+                dateTime: '2024-10-08T05:30:00+05:30',
                 timeZone: 'Asia/Kolkata',
             },
             end: {
-                dateTime: '2024-10-07T17:00:00-08:00',
+                dateTime: '2024-10-08T06:30:00+05:30',
                 timeZone: 'Asia/Kolkata',
             },
             recurrence: [
@@ -69,7 +69,8 @@ export async function POST(req : NextRequest) {
 
         
         const response = await calendar.events.insert({
-            calendarId: 'primary',
+           calendarId: 'kaustubhraut135@gmail.com',
+            // calendarId: 'primary',
             resource: event,
         });
 
