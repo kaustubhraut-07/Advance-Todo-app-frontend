@@ -72,6 +72,8 @@ export async function POST(req : NextRequest) {
            calendarId: 'kaustubhraut135@gmail.com',
             // calendarId: 'primary',
             resource: event,
+            sendNotifications: true,
+            sendUpdates: 'all',
         });
 
         console.log(response, "response");
@@ -83,3 +85,63 @@ export async function POST(req : NextRequest) {
     }
 }
 
+// import { getSession } from "next-auth/react"; 
+// import { NextApiRequest, NextApiResponse   } from 'next';
+// import { NextResponse } from 'next/server';
+// import { getServerSession } from "next-auth/next";
+// import { authOptions } from "../auth/[...nextauth]/options";
+
+// export  async function POST(req: NextApiRequest, res: NextApiResponse) {
+//     if (req.method === 'POST') {
+//         const session = await getServerSession(authOptions);
+
+//         console.log(session, "session in add calendar")
+//         if (!session || !session.accessToken) {
+//             return NextResponse.json({ message: 'Unauthorized'}, { status: 401 });
+//         }
+
+//         const { summary, location, description, start, end } = req.body;
+
+//         const calendarId = 'kaustubhraut135@gmail.com'; 
+//         const accessToken = session.accessToken; 
+
+//         const eventData = {
+//             start: {
+//                 dateTime: start, 
+//                 timeZone: 'Asia/Kolkata',
+//             },
+//             end: {
+//                 dateTime: end, 
+//                 timeZone: 'Asia/Kolkata',
+//             },
+//             summary: summary || 'Default Event Title',
+//             description: description || 'No description provided.',
+//             location: location || 'Default Location',
+//         };
+
+//         try {
+//             const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?sendNotifications=false`, {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'Authorization': `Bearer ${accessToken}`,
+//                 },
+//                 body: JSON.stringify(eventData),
+//             });
+
+//             if (response.ok) {
+//                 const data = await response.json();
+//                 console.log('Event created:', data);
+//                 return NextResponse.json({ message: 'Event created' , data}, { status: 200 });
+//             } else {
+//                 const errorData = await response.json();
+//                 return NextResponse.json({ message: 'Internal server error' , error: errorData}, { status: 500 });
+//             }
+//         } catch (error) {
+//             console.error('Error creating event:', error);
+//             return NextResponse.json({ message: 'Internal server error' , error}, { status: 500 });
+//         }
+//     } else {
+//         return NextResponse.json({ message: 'Some error'}, { status: 405 });
+//     }
+// }

@@ -79,7 +79,7 @@ const router = useRouter();
             description: 'Discuss project updates',
             start: '2024-10-07T17:00:00-07:00',
             end: '2024-10-07T17:00:00-08:00',
-            attendees: [{ email: 'kaustubhr2001@gmail.com' }, { email: 'kaustubh.raut@fxis.ai' }],
+            // attendees: [{ email: 'kaustubhr2001@gmail.com' }, { email: 'kaustubh.raut@fxis.ai' }],
         }),
     });
 
