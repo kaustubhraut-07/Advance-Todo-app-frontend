@@ -322,9 +322,9 @@ const DashboardPage: React.FC = () => {
       return;
     }
 
-    const eventSummary = todo.title; // Use todo title as the summary
-    const eventDescription = todo.description; // Use todo description
-    const eventLocation = 'Remote'; // Default location
+    const eventSummary = todo.title; 
+    const eventDescription = todo.description; 
+    const eventLocation = 'Remote'; 
 
     try {
       const response = await fetch('/api/addtogooglecalendar', {
@@ -377,17 +377,17 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleTestCreateEvent = () => {
-    const eventDetails = {
-      summary: 'Team Meeting',
-      location: 'Zoom',
-      description: 'Discuss project updates',
-      start: '2024-10-10T10:00:00+05:30',
-      end: '2024-10-10T11:00:00+05:30',
-    };
+  // const handleTestCreateEvent = () => {
+  //   const eventDetails = {
+  //     summary: 'Team Meeting',
+  //     location: 'Zoom',
+  //     description: 'Discuss project updates',
+  //     start: '2024-10-10T10:00:00+05:30',
+  //     end: '2024-10-10T11:00:00+05:30',
+  //   };
 
-    createCalendarEvent(eventDetails);
-  };
+  //   createCalendarEvent(eventDetails);
+  // };
 
   const paginate = (pageNumber: number) => setCurrentpage(pageNumber);
 
@@ -445,7 +445,7 @@ const DashboardPage: React.FC = () => {
                   </td>
                   <td>
                     <button
-                      onClick={() => handleAddToGoogleCalendar(todo)} // Pass the current todo
+                      onClick={() => handleAddToGoogleCalendar(todo)} 
                       className="w-full bg-blue-500 text-white text-sm p-2 m-2 rounded hover:bg-blue-600 transition duration-200"
                     >
                       Add to Google Calendar
@@ -455,16 +455,16 @@ const DashboardPage: React.FC = () => {
               ))}
           </tbody>
         </table>
-        {/* Test Create Event Button */}
-        <div className="flex justify-center mt-4">
+        
+        {/* <div className="flex justify-center mt-4">
           <button
             onClick={handleTestCreateEvent}
             className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600"
           >
             Test Create Calendar Event
           </button>
-        </div>
-        {/* Pagination Component */}
+        </div> */}
+       
         <div className="flex justify-center mt-4">
           {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => (
             <button
