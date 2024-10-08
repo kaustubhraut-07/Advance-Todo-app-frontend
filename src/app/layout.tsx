@@ -6,6 +6,8 @@ import "./globals.css";
 import SessionProvider from "@/providers/SessionProvider";
 import Navbar from "./navbar/page";
 import { useSession } from "next-auth/react";
+import { Provider } from "react-redux";
+import {store} from "@/app/store/store";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
        <SessionProvider>
-        
+       <Provider store={store}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -42,6 +44,7 @@ export default function RootLayout({
         <Navbar />
         {children}
       </body>
+      </Provider>
       </SessionProvider>
     </html>
   );
