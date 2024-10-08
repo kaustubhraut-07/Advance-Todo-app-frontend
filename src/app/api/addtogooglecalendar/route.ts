@@ -54,10 +54,10 @@ export async function POST(req : NextRequest) {
                 'RRULE:FREQ=DAILY;COUNT=2',
             ],
             // Uncomment if Domain-Wide Delegation is set up
-            // attendees: [
-            //     { email: 'kaustubhraut135@gmail.com' },
-            //     { email: 'kaustubh.raut@fxis.ai' },
-            // ],
+            attendees: [
+                // { email: 'kaustubhraut135@gmail.com' },
+                // { email: 'kaustubh.raut@fxis.ai' },
+            ],
             reminders: {
                 useDefault: false,
                 overrides: [
@@ -68,17 +68,31 @@ export async function POST(req : NextRequest) {
         };
 
         
-        const response = await calendar.events.insert({
-           calendarId: 'kaustubhraut135@gmail.com',
-            // calendarId: 'primary',
-            resource: event,
-            sendNotifications: true,
-            sendUpdates: 'all',
+        // const response = await calendar.events.insert({
+        // //    calendarId: 'kaustubhraut135@gmail.com',
+        //     calendarId: 'primary',
+        //     resource: event,
+        //     sendNotifications: true,
+        //     sendUpdates: 'all',
+        // });
+console.log(authClient.credentials.access_token , "tokjne") 
+        const response =  await fetch(' https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authClient.credentials.access_token}`,
+            },
+            body: JSON.stringify(event),
         });
+        
 
         console.log(response, "response");
 
-        return NextResponse.json({ message: 'Event created', link: response.data.htmlLink }, { status: 200 });
+        return NextResponse.json({ message: 'Event created', 
+            // link: response.data.htmlLink
+            response: response
+
+         }, { status: 200 });
     } catch (error) {
         console.error('Error accessing Calendar API:', error);
         return NextResponse.json({ message: 'Internal server error', error: error.message }, { status: 500 });

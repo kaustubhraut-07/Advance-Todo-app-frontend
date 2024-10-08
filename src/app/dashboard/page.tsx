@@ -338,6 +338,11 @@ const DashboardPage: React.FC = () => {
           description: eventDescription,
           start: startDate,
           end: endDate,
+          // attendees: [
+          //   { email: 'kaustubhr2001@gmail.com' },
+          //   { email: 'kaustubh.raut@fxis.ai' },
+            
+          // ]
         }),
       });
 
@@ -466,6 +471,10 @@ const DashboardPage: React.FC = () => {
         </div> */}
        
         <div className="flex justify-center mt-4">
+          <button
+            onClick={() => currentpage > 1 && setCurrentpage(currentpage - 1)}
+            className="px-4 py-2 border bg-white text-blue-500"
+          >Previous</button>
           {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => (
             <button
               key={index + 1}
@@ -477,6 +486,10 @@ const DashboardPage: React.FC = () => {
               {index + 1}
             </button>
           ))}
+          <button
+            onClick={() => currentpage < Math.ceil(filtertodos.length / itemsPerPage) && setCurrentpage(currentpage + 1)}
+            className="px-4 py-2 border bg-white text-blue-500"
+          >Next</button>
         </div>
       </div>
     </div>
