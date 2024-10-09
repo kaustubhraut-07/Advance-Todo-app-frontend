@@ -236,8 +236,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {setDarkMode , toggleDarkMode} from '@/app/store/themslice';
+import { setDarkMode, toggleDarkMode } from '@/app/store/themslice';
 import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/app/store';
 
 interface Todo {
   id: number;
@@ -250,37 +251,36 @@ interface Todo {
 const DashboardPage: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filtertodos, setFiltertodos] = useState<Todo[]>(todos);
-  const [currentpage, setCurrentpage] = useState(1);
+  const [currentpage, setCurrentpage] = useState<number>(1);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const { data: Session } = useSession();
+  const { data: session } = useSession();
   const itemsPerPage = 5;
   const router = useRouter();
-  const isDarkMode  = useSelector((state: any) => state.theme.isDarkMode);
-console.log(isDarkMode , "isDarkmode");
-  const dispatch = useDispatch();
+  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  // const dispatch = useDispatch();
 
-  const handleDarkMode = () => {
-  
-    dispatch(setDarkMode(!isDarkMode));
-    toggleDarkMode();
-  };
-  
+  // const handleDarkMode = () => {
+  //   dispatch(setDarkMode(!isDarkMode));
+  //   toggleDarkMode();
+  // };
 
   useEffect(() => {
     const fetchTodos = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}todo/getalltodosbyuseremail/${Session?.user?.email}/`
-        );
-        setTodos(response.data);
-        setFiltertodos(response.data);
+        if (session?.user?.email) {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}todo/getalltodosbyuseremail/${session.user.email}/`
+          );
+          setTodos(response.data);
+          setFiltertodos(response.data);
+        }
       } catch (error) {
         console.error('Error fetching todos:', error);
       }
     };
     fetchTodos();
-  }, [Session?.user?.email]);
+  }, [session?.user?.email]);
 
   const handleEdit = (id: number) => {
     const todo = todos.find((t) => t.id === id);
@@ -334,9 +334,9 @@ console.log(isDarkMode , "isDarkmode");
       return;
     }
 
-    const eventSummary = todo.title; 
-    const eventDescription = todo.description; 
-    const eventLocation = 'Remote'; 
+    const eventSummary = todo.title;
+    const eventDescription = todo.description;
+    const eventLocation = 'Remote';
 
     try {
       const response = await fetch('/api/addtogooglecalendar', {
@@ -350,11 +350,6 @@ console.log(isDarkMode , "isDarkmode");
           description: eventDescription,
           start: startDate,
           end: endDate,
-          // attendees: [
-          //   { email: 'kaustubhr2001@gmail.com' },
-          //   { email: 'kaustubh.raut@fxis.ai' },
-            
-          // ]
         }),
       });
 
@@ -369,63 +364,34 @@ console.log(isDarkMode , "isDarkmode");
       toast.error('Failed to create event in Google Calendar');
     }
   }
-
-  const createCalendarEvent = async (eventDetails: any) => {
-    try {
-      const response = await fetch('/api/create-event', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventDetails),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        console.log('Event created:', data);
-        toast.success('Event created successfully!');
-      } else {
-        console.error('Error creating event:', data.message);
-        toast.error('Error creating event: ' + data.message);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to create event');
-    }
-  };
-
-  // const handleTestCreateEvent = () => {
-  //   const eventDetails = {
-  //     summary: 'Team Meeting',
-  //     location: 'Zoom',
-  //     description: 'Discuss project updates',
-  //     start: '2024-10-10T10:00:00+05:30',
-  //     end: '2024-10-10T11:00:00+05:30',
-  //   };
-
-  //   createCalendarEvent(eventDetails);
-  // };
-
   const paginate = (pageNumber: number) => setCurrentpage(pageNumber);
 
   return (
-    <div>
+    <div className='min-h-screen'>
+    <div className={  isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}>
       <ToastContainer />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 h-screen">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
-          <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" onClick={handleCreateTodos}>
+          <button
+            className={`${
+              isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+            } text-white px-3 py-1 rounded`}
+            onClick={handleCreateTodos}
+          >
             Create Todo
           </button>
         </div>
         <input
-          onChange={(e) => handleFiltertodos(e)}
+          onChange={handleFiltertodos}
           placeholder="Filter todos"
-          className="border border-gray-800 rounded py-2 px-4 w-full mb-4"
+          className={`border ${
+            isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-800 bg-white text-black'
+          } rounded py-2 px-4 w-full mb-4`}
         />
         <table className="min-w-full table-auto">
           <thead>
-            <tr className="bg-gray-100">
+            <tr className={isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100'}>
               <th className="px-4 py-2 text-left">Title</th>
               <th className="px-4 py-2 text-left">Status</th>
               <th className="px-4 py-2 text-left">Start Date Time</th>
@@ -435,77 +401,91 @@ console.log(isDarkMode , "isDarkmode");
             </tr>
           </thead>
           <tbody>
-            {currentTodos.length > 0 &&
-              currentTodos.map((todo) => (
-                <tr key={todo.id} className="border-b">
-                  <td className="px-4 py-2">{todo.title}</td>
-                  <td className="px-4 py-2">{todo.completed ? 'Completed' : 'Not Completed'}</td>
-                  <td className="px-4 py-2">
-                    <input type="datetime-local" onChange={(e) => setStartDate(e.target.value)} />
-                  </td>
-                  <td className="px-4 py-2">
-                    <input type="datetime-local" onChange={(e) => setEndDate(e.target.value)} />
-                  </td>
-                  <td className="flex justify-center items-center px-4 py-2 space-x-2">
-                    <button
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                      onClick={() => handleEdit(todo.id)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      onClick={() => handleDelete(todo.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => handleAddToGoogleCalendar(todo)} 
-                      className="w-full bg-blue-500 text-white text-sm p-2 m-2 rounded hover:bg-blue-600 transition duration-200"
-                    >
-                      Add to Google Calendar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+            {currentTodos.map((todo) => (
+              <tr key={todo.id} className={isDarkMode ? 'border-b border-gray-600' : 'border-b'}>
+                <td className="px-4 py-2">{todo.title}</td>
+                <td className="px-4 py-2">{todo.completed ? 'Completed' : 'Not Completed'}</td>
+                <td className="px-4 py-2">
+                  <input
+                    type="datetime-local"
+                    className={isDarkMode ? 'bg-gray-700 text-white' : ''}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </td>
+                <td className="px-4 py-2">
+                  <input
+                    type="datetime-local"
+                    className={isDarkMode ? 'bg-gray-700 text-white' : ''}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </td>
+                <td className="flex justify-center items-center px-4 py-2 space-x-2">
+                  <button
+                    className={`${
+                      isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                    } text-white px-3 py-1 rounded`}
+                    onClick={() => handleEdit(todo.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className={`${
+                      isDarkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-600'
+                    } text-white px-3 py-1 rounded`}
+                    onClick={() => handleDelete(todo.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+                <td>
+                  <button
+                    onClick={() => handleAddToGoogleCalendar(todo)}
+                    className={`${
+                      isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                    } w-full text-white text-sm p-2 m-2 rounded transition duration-200`}
+                  >
+                    Add to Google Calendar
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        
-        {/* <div className="flex justify-center mt-4">
-          <button
-            onClick={handleTestCreateEvent}
-            className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600"
-          >
-            Test Create Calendar Event
-          </button>
-        </div> */}
-       
+
         <div className="flex justify-center mt-4">
           <button
             onClick={() => currentpage > 1 && setCurrentpage(currentpage - 1)}
-            className="px-4 py-2 border bg-white text-blue-500"
-          >Previous</button>
-          {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => (
+            className={`px-4 py-2 border ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-blue-500'}`}
+          >
+            Previous
+          </button>
+          {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => index + 1).map((number) => (
             <button
-              key={index + 1}
-              onClick={() => paginate(index + 1)}
+              key={number}
+              onClick={() => paginate(number)}
               className={`px-4 py-2 border ${
-                currentpage === index + 1 ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+                number === currentpage
+                  ? 'bg-blue-500 text-white'
+                  : isDarkMode
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-white text-blue-500'
               }`}
             >
-              {index + 1}
+              {number}
             </button>
           ))}
           <button
             onClick={() => currentpage < Math.ceil(filtertodos.length / itemsPerPage) && setCurrentpage(currentpage + 1)}
-            className="px-4 py-2 border bg-white text-blue-500"
-          >Next</button>
+            className={`px-4 py-2 border ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-blue-500'}`}
+          >
+            Next
+          </button>
         </div>
       </div>
+    </div>
     </div>
   );
 };
 
 export default DashboardPage;
+
