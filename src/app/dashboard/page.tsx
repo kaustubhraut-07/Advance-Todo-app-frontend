@@ -236,6 +236,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {setDarkMode , toggleDarkMode} from '@/app/store/themslice';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface Todo {
   id: number;
@@ -254,6 +256,16 @@ const DashboardPage: React.FC = () => {
   const { data: Session } = useSession();
   const itemsPerPage = 5;
   const router = useRouter();
+  const isDarkMode  = useSelector((state: any) => state.theme.isDarkMode);
+console.log(isDarkMode , "isDarkmode");
+  const dispatch = useDispatch();
+
+  const handleDarkMode = () => {
+  
+    dispatch(setDarkMode(!isDarkMode));
+    toggleDarkMode();
+  };
+  
 
   useEffect(() => {
     const fetchTodos = async () => {
