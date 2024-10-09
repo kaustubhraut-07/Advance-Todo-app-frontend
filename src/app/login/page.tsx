@@ -58,7 +58,8 @@ const LoginPage: React.FC = () => {
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block">{isDarkMode ? 'text-gray-300' : 'text-gray-700'}</label>
+          <label htmlFor="email" className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</label>
+
             <input
               type="text"
               id="email"
@@ -69,7 +70,8 @@ const LoginPage: React.FC = () => {
             />
           </div>
           <div className="mb-6">
-            <label htmlFor="password" className="block">{isDarkMode ? 'text-gray-300' : 'text-gray-700'}</label>
+          <label htmlFor="password" className={`block ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Password</label>
+
             <input
               type="password"
               id="password"

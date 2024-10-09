@@ -62,13 +62,16 @@ const Navbar: React.FC = () => {
               </button>
             )}
       </div>
-      <div>
+      {session?.user && (
+        <div>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
         >
           Log Out
         </button>
       </div>
+      )}
+      
     </div>
     </nav >
   );
