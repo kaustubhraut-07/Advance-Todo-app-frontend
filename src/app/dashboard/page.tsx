@@ -26,6 +26,8 @@ const DashboardPage: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filtertodos, setFiltertodos] = useState<Todo[]>(todos);
   const [currentpage, setCurrentpage] = useState<number>(1);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
+
   const { data: session } = useSession();
   const itemsPerPage = 5;
   const router = useRouter();
@@ -65,6 +67,28 @@ const DashboardPage: React.FC = () => {
       router.push(`/edittodo?${queryParams}`);
     }
   };
+
+  const handleSort = (key: keyof Todo) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+
+    setSortConfig({ key, direction });
+
+    const sortedTodos = [...filtertodos].sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === 'ascending' ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === 'ascending' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setFiltertodos(sortedTodos);
+  };
+
 
   const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this todo?');
@@ -111,10 +135,8 @@ const DashboardPage: React.FC = () => {
     const eventDescription = todo.description;
     const eventLocation = 'Remote';
 
-    
-    // setTodos((prevTodos) =>
-    //   prevTodos.map((t) => (t.id === todo.id ? { ...t, loading: true } : t))
-    // );
+
+
     setFiltertodos((prevTodos) => prevTodos.map((t) => (t.id === todo.id ? { ...t, loading: true } : t)));
 
     try {
@@ -142,19 +164,17 @@ const DashboardPage: React.FC = () => {
       console.error('Error creating event:', error);
       toast.error('Failed to create event in Google Calendar');
     } finally {
-     
-      // setTodos((prevTodos) =>
-      //   prevTodos.map((t) => (t.id === todo.id ? { ...t, loading: false } : t))
-      // );
+
+
       setFiltertodos((prevTodos) =>
         prevTodos.map((t) => (t.id === todo.id ? { ...t, loading: false } : t))
       );
-     
+
     }
   }
 
   const paginate = (pageNumber: number) => setCurrentpage(pageNumber);
-  console.log(todos , "todos");
+  console.log(todos, "todos");
   return (
     <div className='min-h-screen'>
       <div className={isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}>
@@ -163,9 +183,8 @@ const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
             <button
-              className={`${
-                isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-              } text-white px-3 py-1 rounded`}
+              className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                } text-white px-3 py-1 rounded`}
               onClick={handleCreateTodos}
             >
               Create Todo
@@ -174,15 +193,19 @@ const DashboardPage: React.FC = () => {
           <input
             onChange={handleFiltertodos}
             placeholder="Filter todos"
-            className={`border ${
-              isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-800 bg-white text-black'
-            } rounded py-2 px-4 w-full mb-4`}
+            className={`border ${isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-800 bg-white text-black'
+              } rounded py-2 px-4 w-full mb-4`}
           />
           <table className="min-w-full table-auto">
             <thead>
               <tr className={isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100'}>
-                <th className="px-4 py-2 text-left">Title</th>
-                <th className="px-4 py-2 text-left">Status</th>
+                <th className="px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('title')}>
+                  Title {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                </th>
+                <th className="px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('completed')}>
+                  Status {sortConfig?.key === 'completed' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                </th>
+
                 <th className="px-4 py-2 text-left">Start Date Time</th>
                 <th className="px-4 py-2 text-left">End Date Time</th>
                 <th className="px-4 py-2 text-left">Actions</th>
@@ -222,45 +245,41 @@ const DashboardPage: React.FC = () => {
                   </td>
                   <td className="flex justify-center items-center px-4 py-2 space-x-2">
                     <button
-                      className={`${
-                        isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                      } text-white px-3 py-1 rounded`}
+                      className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                        } text-white px-3 py-1 rounded`}
                       onClick={() => handleEdit(todo.id)}
                     >
                       Edit
                     </button>
                     <button
-                      className={`${
-                        isDarkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-600'
-                      } text-white px-3 py-1 rounded`}
+                      className={`${isDarkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-600'
+                        } text-white px-3 py-1 rounded`}
                       onClick={() => handleDelete(todo.id)}
                     >
                       Delete
                     </button>
                   </td>
-                  
-                  <td>
-             
-                    {todo.loading ? (
-                        <>
 
-                          <button className={`${
-                          isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                        } w-full text-white text-sm p-2 m-2 rounded transition duration-200 flex justify-center `} disabled>
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-          
-                           
-                          </button>
-                          </> 
-                      ) : (
+                  <td>
+
+                    {todo.loading ? (
+                      <>
+
+                        <button className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                          } w-full text-white text-sm p-2 m-2 rounded transition duration-200 flex justify-center `} disabled>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+
+
+                        </button>
+                      </>
+                    ) : (
                       <button
                         onClick={() => handleAddToGoogleCalendar(todo)}
-                        className={`${
-                          isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                        } w-full text-white text-sm p-2 m-2 rounded transition duration-200`}
+                        className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                          } w-full text-white text-sm p-2 m-2 rounded transition duration-200`}
                       >
                         Add to Google Calendar
                       </button>
@@ -284,13 +303,12 @@ const DashboardPage: React.FC = () => {
               <button
                 key={number}
                 onClick={() => paginate(number)}
-                className={`px-4 py-2 border ${
-                  number === currentpage
+                className={`px-4 py-2 border ${number === currentpage
                     ? 'bg-blue-500 text-white'
                     : isDarkMode
-                    ? 'bg-gray-800 text-white'
-                    : 'bg-white text-blue-500'
-                }`}
+                      ? 'bg-gray-800 text-white'
+                      : 'bg-white text-blue-500'
+                  }`}
               >
                 {number}
               </button>
