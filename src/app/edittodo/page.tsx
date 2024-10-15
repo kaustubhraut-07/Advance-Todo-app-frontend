@@ -17,10 +17,13 @@ interface Todo {
 }
 
 interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  // searchParams: { [key: string]: string | string[] | undefined };
+  isOpen : boolean;
+  onClose : () => void;
+  todo : Todo;
 }
 
-const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
+const EditTodo: React.FC<PageProps> = ({ searchParams , isOpen , onClose }) => {
   const { data: session } = useSession();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -33,24 +36,24 @@ const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
 
   const notify = () => toast('Todo Edited Successfully!');
 
-  useEffect(() => {
-    const id = searchParams.id;
-    const title = searchParams.title;
-    const description = searchParams.description;
-    const completed = searchParams.completed;
+  // useEffect(() => {
+  //   const id = searchParams.id;
+  //   const title = searchParams.title;
+  //   const description = searchParams.description;
+  //   const completed = searchParams.completed;
 
-    if (id && title && description) {
-      setTodo({
-        id: Number(id),
-        title: String(title),
-        description: String(description),
-        completed: completed === 'true',
-      });
-      setTitle(String(title));
-      setDescription(String(description));
-      setCompleted(completed === 'true');
-    }
-  }, [searchParams]);
+  //   if (id && title && description) {
+  //     setTodo({
+  //       id: Number(id),
+  //       title: String(title),
+  //       description: String(description),
+  //       completed: completed === 'true',
+  //     });
+  //     setTitle(String(title));
+  //     setDescription(String(description));
+  //     setCompleted(completed === 'true');
+  //   }
+  // }, [searchParams]);
 
   const handleToggleTheme = () => {
     dispatch(setDarkMode(!isDarkMode));
@@ -73,7 +76,7 @@ const EditTodo: React.FC<PageProps> = ({ searchParams }) => {
   };
 
   if (!todo) {
-    return <div>Loading...</div>;
+    return ;
   }
 
   return (

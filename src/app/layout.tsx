@@ -8,6 +8,7 @@ import Navbar from "./navbar/page";
 import { useSession } from "next-auth/react";
 import { Provider } from "react-redux";
 import {store} from "@/app/store/store";
+import {DragDropContext} from 'react-beautiful-dnd';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <DragDropContext>
        <SessionProvider>
        <Provider store={store}>
       <body
@@ -46,6 +48,7 @@ export default function RootLayout({
       </body>
       </Provider>
       </SessionProvider>
+      </DragDropContext>
     </html>
   );
 }

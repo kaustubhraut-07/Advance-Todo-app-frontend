@@ -10,6 +10,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { setDarkMode, toggleDarkMode } from '@/app/store/themslice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
+import CreateTodo from '../createtodo/page';
+import EditTodo from '../edittodo/page';
+import { Droppable, Draggable, DragDropContext } from 'react-beautiful-dnd';
 
 interface Todo {
   id: number;
@@ -27,7 +30,8 @@ const DashboardPage: React.FC = () => {
   const [filtertodos, setFiltertodos] = useState<Todo[]>(todos);
   const [currentpage, setCurrentpage] = useState<number>(1);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
-
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const { data: session } = useSession();
   const itemsPerPage = 5;
   const router = useRouter();
@@ -52,7 +56,7 @@ const DashboardPage: React.FC = () => {
       }
     };
     fetchTodos();
-  }, [session?.user?.email]);
+  }, [session?.user]);
 
   const handleEdit = (id: number) => {
     const todo = todos.find((t) => t.id === id);
@@ -89,7 +93,6 @@ const DashboardPage: React.FC = () => {
     setFiltertodos(sortedTodos);
   };
 
-
   const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this todo?');
     if (!confirmDelete) return;
@@ -106,7 +109,11 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleCreateTodos = () => {
-    router.push('/createtodo');
+    setIsModalOpen(true);
+  };
+
+  const handleEditTodo = () => {
+    setIsEditModalOpen(true);
   };
 
   const handleFiltertodos = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,8 +142,6 @@ const DashboardPage: React.FC = () => {
     const eventDescription = todo.description;
     const eventLocation = 'Remote';
 
-
-
     setFiltertodos((prevTodos) => prevTodos.map((t) => (t.id === todo.id ? { ...t, loading: true } : t)));
 
     try {
@@ -164,167 +169,221 @@ const DashboardPage: React.FC = () => {
       console.error('Error creating event:', error);
       toast.error('Failed to create event in Google Calendar');
     } finally {
-
-
       setFiltertodos((prevTodos) =>
         prevTodos.map((t) => (t.id === todo.id ? { ...t, loading: false } : t))
       );
-
     }
   }
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+  };
+
   const paginate = (pageNumber: number) => setCurrentpage(pageNumber);
-  console.log(todos, "todos");
+
+  const handleOnDragEnd = async (result: any) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      return;
+    }
+
+    const todoId = parseInt(draggableId, 10);
+    const updatedTodo = todos.find((todo) => todo.id === todoId);
+
+    if (updatedTodo) {
+      updatedTodo.completed = destination.droppableId === 'completed';
+
+      try {
+        await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}todo/updatetodo/${updatedTodo.id}/`, updatedTodo);
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === todoId ? { ...todo, completed: updatedTodo.completed } : todo))
+        );
+        setFiltertodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === todoId ? { ...todo, completed: updatedTodo.completed } : todo))
+        );
+      } catch (error) {
+        console.error('Error updating todo:', error);
+      }
+    }
+  };
+
+  const notCompletedTodos = todos.filter((todo) => !todo.completed);
+  const completedTodos = todos.filter((todo) => todo.completed);
+
   return (
-    <div className='min-h-screen'>
-      <div className={isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}>
-        <ToastContainer />
-        <div className="container mx-auto px-4 py-8 h-screen">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
-            <button
-              className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                } text-white px-3 py-1 rounded`}
-              onClick={handleCreateTodos}
-            >
-              Create Todo
-            </button>
-          </div>
-          <input
-            onChange={handleFiltertodos}
-            placeholder="Filter todos"
-            className={`border ${isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-800 bg-white text-black'
-              } rounded py-2 px-4 w-full mb-4`}
-          />
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr className={isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100'}>
-                <th className="px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('title')}>
-                  Title {sortConfig?.key === 'title' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-                <th className="px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('completed')}>
-                  Status {sortConfig?.key === 'completed' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-
-                <th className="px-4 py-2 text-left">Start Date Time</th>
-                <th className="px-4 py-2 text-left">End Date Time</th>
-                <th className="px-4 py-2 text-left">Actions</th>
-                <th className="px-4 py-2 text-left">Add to Calendar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentTodos.map((todo) => (
-                <tr key={todo.id} className={isDarkMode ? 'border-b border-gray-600' : 'border-b'}>
-                  <td className="px-4 py-2">{todo.title}</td>
-                  <td className="px-4 py-2">{todo.completed ? 'Completed' : 'Not Completed'}</td>
-                  <td className="px-4 py-2">
-                    <input
-                      type="datetime-local"
-                      className={isDarkMode ? 'bg-gray-700 text-white' : ''}
-                      onChange={(e) => {
-                        const updatedTodos = todos.map((t) =>
-                          t.id === todo.id ? { ...t, startDate: e.target.value } : t
-                        );
-                        setTodos(updatedTodos);
-                        setFiltertodos(updatedTodos);
-                      }}
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <input
-                      type="datetime-local"
-                      className={isDarkMode ? 'bg-gray-700 text-white' : ''}
-                      onChange={(e) => {
-                        const updatedTodos = todos.map((t) =>
-                          t.id === todo.id ? { ...t, endDate: e.target.value } : t
-                        );
-                        setTodos(updatedTodos);
-                        setFiltertodos(updatedTodos);
-                      }}
-                    />
-                  </td>
-                  <td className="flex justify-center items-center px-4 py-2 space-x-2">
-                    <button
-                      className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                        } text-white px-3 py-1 rounded`}
-                      onClick={() => handleEdit(todo.id)}
+    <>
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+        <div className='min-h-screen'>
+          <div className={isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}>
+            <ToastContainer />
+            <div className="container mx-auto px-4 py-8 h-screen">
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
+                <button
+                  className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'} text-white px-3 py-1 rounded`}
+                  onClick={handleCreateTodos}
+                >
+                  Create Todo
+                </button>
+              </div>
+              <CreateTodo isOpen={isModalOpen} onClose={handleCloseModal} />
+              <input
+                onChange={handleFiltertodos}
+                placeholder="Filter todos"
+                className={`border ${isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-800 bg-white text-black'} rounded py-2 px-4 w-full mb-4`}
+              />
+              <div className="flex space-x-4">
+                <Droppable droppableId="not-completed">
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`w-1/2 p-4 ${snapshot.isDraggingOver ? 'bg-gray-200' : 'bg-white'} rounded shadow`}
                     >
-                      Edit
-                    </button>
-                    <button
-                      className={`${isDarkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-600'
-                        } text-white px-3 py-1 rounded`}
-                      onClick={() => handleDelete(todo.id)}
+                      <h2 className="text-xl font-bold mb-4">Not Completed</h2>
+                      {notCompletedTodos.map((todo, index) => (
+                        <Draggable key={todo.id} draggableId={todo.id.toString()} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-4 mb-2 ${snapshot.isDragging ? 'bg-gray-300' : 'bg-white'} rounded shadow`}
+                            >
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h3 className="text-lg font-bold">{todo.title}</h3>
+                                  <p>{todo.description}</p>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <button
+                                    className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'} text-white px-3 py-1 rounded`}
+                                    onClick={() => handleEdit(todo.id)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <EditTodo isOpen={isEditModalOpen} onClose={handleCloseEditModal} todo={todo} />
+                                  <button
+                                    className={`${isDarkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-600'} text-white px-3 py-1 rounded`}
+                                    onClick={() => handleDelete(todo.id)}
+                                  >
+                                    Delete
+                                  </button>
+                                  <button
+                                    onClick={() => handleAddToGoogleCalendar(todo)}
+                                    className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'} w-full text-white text-sm p-2 m-2 rounded transition duration-200`}
+                                  >
+                                    Add to Google Calendar
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+                <Droppable droppableId="completed">
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`w-1/2 p-4 ${snapshot.isDraggingOver ? 'bg-gray-200' : 'bg-white'} rounded shadow`}
                     >
-                      Delete
-                    </button>
-                  </td>
-
-                  <td>
-
-                    {todo.loading ? (
-                      <>
-
-                        <button className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                          } w-full text-white text-sm p-2 m-2 rounded transition duration-200 flex justify-center `} disabled>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-
-
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => handleAddToGoogleCalendar(todo)}
-                        className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-                          } w-full text-white text-sm p-2 m-2 rounded transition duration-200`}
-                      >
-                        Add to Google Calendar
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="flex justify-center mt-4">
-            {currentpage !== 1 && (
-              <button
-                onClick={() => currentpage > 1 && setCurrentpage(currentpage - 1)}
-                className={`px-4 py-2 border ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-blue-500'}`}
-              >
-                Previous
-              </button>
-            )}
-            {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => index + 1).map((number) => (
-              <button
-                key={number}
-                onClick={() => paginate(number)}
-                className={`px-4 py-2 border ${number === currentpage
-                    ? 'bg-blue-500 text-white'
-                    : isDarkMode
-                      ? 'bg-gray-800 text-white'
-                      : 'bg-white text-blue-500'
-                  }`}
-              >
-                {number}
-              </button>
-            ))}
-            {currentpage !== Math.ceil(filtertodos.length / itemsPerPage) && (
-              <button
-                onClick={() => currentpage < Math.ceil(filtertodos.length / itemsPerPage) && setCurrentpage(currentpage + 1)}
-                className={`px-4 py-2 border ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-blue-500'}`}
-              >
-                Next
-              </button>
-            )}
+                      <h2 className="text-xl font-bold mb-4">Completed</h2>
+                      {completedTodos.map((todo, index) => (
+                        <Draggable key={todo.id} draggableId={todo.id.toString()} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-4 mb-2 ${snapshot.isDragging ? 'bg-gray-300' : 'bg-white'} rounded shadow`}
+                            >
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h3 className="text-lg font-bold">{todo.title}</h3>
+                                  <p>{todo.description}</p>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <button
+                                    className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'} text-white px-3 py-1 rounded`}
+                                    onClick={() => handleEdit(todo.id)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <EditTodo isOpen={isEditModalOpen} onClose={handleCloseEditModal} todo={todo} />
+                                  <button
+                                    className={`${isDarkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-600'} text-white px-3 py-1 rounded`}
+                                    onClick={() => handleDelete(todo.id)}
+                                  >
+                                    Delete
+                                  </button>
+                                  <button
+                                    onClick={() => handleAddToGoogleCalendar(todo)}
+                                    className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'} w-full text-white text-sm p-2 m-2 rounded transition duration-200`}
+                                  >
+                                    Add to Google Calendar
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+              <div className="flex justify-center mt-4">
+                {currentpage !== 1 && (
+                  <button
+                    onClick={() => currentpage > 1 && setCurrentpage(currentpage - 1)}
+                    className={`px-4 py-2 border ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-blue-500'}`}
+                  >
+                    Previous
+                  </button>
+                )}
+                {Array.from({ length: Math.ceil(filtertodos.length / itemsPerPage) }, (_, index) => index + 1).map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => paginate(number)}
+                    className={`px-4 py-2 border ${number === currentpage
+                      ? 'bg-blue-500 text-white'
+                      : isDarkMode
+                        ? 'bg-gray-800 text-white'
+                        : 'bg-white text-blue-500'
+                      }`}
+                  >
+                    {number}
+                  </button>
+                ))}
+                {currentpage !== Math.ceil(filtertodos.length / itemsPerPage) && (
+                  <button
+                    onClick={() => currentpage < Math.ceil(filtertodos.length / itemsPerPage) && setCurrentpage(currentpage + 1)}
+                    className={`px-4 py-2 border ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-blue-500'}`}
+                  >
+                    Next
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DragDropContext>
+    </>
   );
 };
 
