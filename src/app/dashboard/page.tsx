@@ -1,11 +1,11 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useSelector } from 'react-redux';
+
 import { RootState } from '@/app/store';
 import CreateTodo from '../createtodo/page';
 import {
@@ -16,11 +16,11 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableTodoItem from './SortableItem';
+import { useSelector } from 'react-redux';
 
 interface Todo {
   id: number;
@@ -60,7 +60,7 @@ const DashboardPage: React.FC = () => {
   }, [session?.user]);
 
   const handleEdit = (id: number) => {
-    router.push(`/edittodo?id=${id}`);
+    // router.push(`/edittodo?id=${id}`);
   };
 
   const handleDelete = async (id: number) => {
@@ -102,38 +102,48 @@ const DashboardPage: React.FC = () => {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleOnDragEnd}>
-      <div className='min-h-screen'>
-        <div className={isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}>
-          <ToastContainer />
-          <div className="container mx-auto px-4 py-8 h-screen">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
-              <button
-                className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'} text-white px-3 py-1 rounded`}
-                onClick={() => setIsModalOpen(true)}
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
+        <ToastContainer />
+        <div className="container mx-auto px-4 py-8 h-screen">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
+            <button
+              className={`${
+                isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white px-3 py-1 rounded`}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Todo
+            </button>
+          </div>
+          <CreateTodo isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+          <div className="flex space-x-4">
+            <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+              <div
+                id="not-completed"
+                className={`w-1/2 p-4 rounded shadow ${
+                  isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
+                }`}
               >
-                Create Todo
-              </button>
-            </div>
-            <CreateTodo isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-            <div className="flex space-x-4">
-              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
-                <div id="not-completed" className="w-1/2 p-4 bg-white rounded shadow">
-                  <h2 className="text-xl font-bold mb-4">Not Completed</h2>
-                  {notCompletedTodos.map((todo) => (
-                    <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
-                  ))}
-                </div>
-              </SortableContext>
-              <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
-                <div id="completed" className="w-1/2 p-4 bg-white rounded shadow">
-                  <h2 className="text-xl font-bold mb-4">Completed</h2>
-                  {completedTodos.map((todo) => (
-                    <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
-                  ))}
-                </div>
-              </SortableContext>
-            </div>
+                <h2 className="text-xl font-bold mb-4">Not Completed</h2>
+                {notCompletedTodos.map((todo) => (
+                  <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
+                ))}
+              </div>
+            </SortableContext>
+            <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+              <div
+                id="completed"
+                className={`w-1/2 p-4 rounded shadow ${
+                  isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
+                }`}
+              >
+                <h2 className="text-xl font-bold mb-4">Completed</h2>
+                {completedTodos.map((todo) => (
+                  <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
+                ))}
+              </div>
+            </SortableContext>
           </div>
         </div>
       </div>
