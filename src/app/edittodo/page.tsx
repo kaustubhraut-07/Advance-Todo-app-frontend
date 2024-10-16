@@ -1,5 +1,4 @@
-'use client';
-
+'use client'
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -17,13 +16,12 @@ interface Todo {
 }
 
 interface PageProps {
-  // searchParams: { [key: string]: string | string[] | undefined };
-  isOpen : boolean;
-  onClose : () => void;
-  todo : Todo;
+  isOpen: boolean;
+  onClose: () => void;
+  todo: Todo;
 }
 
-const EditTodo: React.FC<PageProps> = ({ searchParams , isOpen , onClose }) => {
+const EditTodo: React.FC<PageProps> = ({ todo: initialTodo, isOpen, onClose }) => {
   const { data: session } = useSession();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -36,29 +34,14 @@ const EditTodo: React.FC<PageProps> = ({ searchParams , isOpen , onClose }) => {
 
   const notify = () => toast('Todo Edited Successfully!');
 
-  // useEffect(() => {
-  //   const id = searchParams.id;
-  //   const title = searchParams.title;
-  //   const description = searchParams.description;
-  //   const completed = searchParams.completed;
-
-  //   if (id && title && description) {
-  //     setTodo({
-  //       id: Number(id),
-  //       title: String(title),
-  //       description: String(description),
-  //       completed: completed === 'true',
-  //     });
-  //     setTitle(String(title));
-  //     setDescription(String(description));
-  //     setCompleted(completed === 'true');
-  //   }
-  // }, [searchParams]);
-
-  const handleToggleTheme = () => {
-    dispatch(setDarkMode(!isDarkMode));
-    toggleDarkMode();
-  };
+  useEffect(() => {
+    if (initialTodo) {
+      setTodo(initialTodo);
+      setTitle(initialTodo.title);
+      setDescription(initialTodo.description);
+      setCompleted(initialTodo.completed);
+    }
+  }, [initialTodo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,23 +52,24 @@ const EditTodo: React.FC<PageProps> = ({ searchParams , isOpen , onClose }) => {
     try {
       await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}todo/updatetodo/${todo.id}/`, updatedTodo);
       notify();
+      onClose();
       router.push('/dashboard');
     } catch (error) {
       console.error('Error updating todo:', error);
     }
   };
 
-  if (!todo) {
-    return ;
+  if (!isOpen) {
+    return null;
   }
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center ${
-        isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'
-      }`}
-    >
-      <div className={`max-w-lg w-full p-5 border rounded-lg shadow-lg ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div
+        className={`max-w-lg w-full p-5 border rounded-lg shadow-lg ${
+          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        }`}
+      >
         <h2 className="text-2xl font-bold text-center mb-5">Edit Todo</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -141,13 +125,15 @@ const EditTodo: React.FC<PageProps> = ({ searchParams , isOpen , onClose }) => {
             >
               Update Todo
             </button>
+            <button
+              type="button"
+              className="bg-red-500 text-white px-4 py-2 rounded shadow ml-2 hover:bg-red-600 transition"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
           </div>
         </form>
-        {session?.user && (
-          <div className="mt-4 text-center">
-            <p>Editing as: {session.user.name}</p>
-          </div>
-        )}
         <ToastContainer />
       </div>
     </div>
