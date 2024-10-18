@@ -35,6 +35,8 @@ interface Todo {
 
 const DashboardPage: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { data: session } = useSession();
   const router = useRouter();
@@ -51,6 +53,7 @@ const DashboardPage: React.FC = () => {
             `${process.env.NEXT_PUBLIC_BACKEND_URL}todo/getalltodosbyuseremail/${session.user.email}/`
           );
           setTodos(response.data);
+          setFilteredTodos(response.data); // Initialize filteredTodos with the full list of todos
         }
       } catch (error) {
         console.error('Error fetching todos:', error);
@@ -58,6 +61,18 @@ const DashboardPage: React.FC = () => {
     };
     fetchTodos();
   }, [session?.user]);
+
+  useEffect(() => {
+    // Filter todos based on the search query
+    const result = todos.filter(todo =>
+      todo.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredTodos(result);
+  }, [searchQuery, todos]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
 
   const handleEdit = (id: number) => {
     // router.push(`/edittodo?id=${id}`);
@@ -97,57 +112,71 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const notCompletedTodos = todos.filter((todo) => !todo.completed);
-  const completedTodos = todos.filter((todo) => todo.completed);
+  const notCompletedTodos = filteredTodos.filter((todo) => !todo.completed);
+  const completedTodos = filteredTodos.filter((todo) => todo.completed);
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleOnDragEnd}>
-      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
-        <ToastContainer />
-        <div className="container mx-auto px-4 py-8 h-screen">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
-            <button
-              className={`${
-                isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
-              } text-white px-3 py-1 rounded`}
-              onClick={() => setIsModalOpen(true)}
-            >
-              Create Todo
-            </button>
-          </div>
-          <CreateTodo isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-          <div className="flex space-x-4">
-            <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
-              <div
-                id="not-completed"
-                className={`w-1/2 p-4 rounded shadow ${
-                  isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
-                }`}
+    <>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleOnDragEnd}>
+        <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
+          <ToastContainer />
+          <div className="container mx-auto px-4 py-8 h-screen">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
+              <button
+                className={`${
+                  isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                } text-white px-3 py-1 rounded`}
+                onClick={() => setIsModalOpen(true)}
               >
-                <h2 className="text-xl font-bold mb-4">Not Completed</h2>
-                {notCompletedTodos.map((todo) => (
-                  <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
-                ))}
-              </div>
-            </SortableContext>
-            <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
-              <div
-                id="completed"
-                className={`w-1/2 p-4 rounded shadow ${
-                  isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
-                }`}
-              >
-                <h2 className="text-xl font-bold mb-4">Completed</h2>
-                {completedTodos.map((todo) => (
-                  <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
-                ))}
-              </div>
-            </SortableContext>
+                Create Todo
+              </button>
+            </div>
+
+            <CreateTodo isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <input
+              type="text"
+              placeholder="Search by title"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className={`w-full p-2 mb-4 rounded ${
+                isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400' : 'bg-white text-black placeholder-gray-600'
+              }`}
+            />
+
+            <div className="flex space-x-4">
+              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+                <div
+                  id="not-completed"
+                  className={`w-1/2 p-4 rounded shadow ${
+                    isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
+                  }`}
+                >
+                  <h2 className="text-xl font-bold mb-4">Not Completed</h2>
+                  {notCompletedTodos.map((todo) => (
+                    <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
+                  ))}
+                </div>
+              </SortableContext>
+
+              <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+                <div
+                  id="completed"
+                  className={`w-1/2 p-4 rounded shadow ${
+                    isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
+                  }`}
+                >
+                  <h2 className="text-xl font-bold mb-4">Completed</h2>
+                  {completedTodos.map((todo) => (
+                    <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
+                  ))}
+                </div>
+              </SortableContext>
+            </div>
           </div>
         </div>
-      </div>
-    </DndContext>
+      </DndContext>
+    </>
   );
 };
 
