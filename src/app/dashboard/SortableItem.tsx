@@ -4,6 +4,8 @@ import { useDraggable } from '@dnd-kit/core';
 import EditTodo from '../edittodo/page';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
+import { useSortable } from '@dnd-kit/sortable';
+import {CSS} from "@dnd-kit/utilities";
 
 interface SortableTodoItemProps {
   todo: {
@@ -17,7 +19,8 @@ interface SortableTodoItemProps {
 }
 
 const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDelete }) => {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id: todo.id.toString() });
+  // const { attributes, listeners, setNodeRef } = useDraggable({ id: todo.id.toString() });
+  const { attributes, listeners, setNodeRef , transform , transition } = useSortable({ id: todo.id.toString() });
   const [isEditModalOpen, setEditModalOpen] = useState(false);
 
   // Get the dark mode state from Redux
@@ -31,11 +34,17 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onEdit, onDel
     setEditModalOpen(false);
   };
 
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  }
+
   return (
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      style={style}
       className={`p-4 mb-2 rounded shadow ${
         isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'
       }`}

@@ -101,7 +101,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleOnDragEnd = async (event: any) => {
+  const handleOnDragEnd = async ( event: any) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
