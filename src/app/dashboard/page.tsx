@@ -14,10 +14,12 @@ import {
   MouseSensor,
   useSensor,
   useSensors,
+  useDraggable, 
+  TouchSensor
 } from '@dnd-kit/core';
 import {
   SortableContext,
-  verticalListSortingStrategy,
+  horizontalListSortingStrategy
 } from '@dnd-kit/sortable';
 import SortableTodoItem from './SortableItem';
 import { useSelector } from 'react-redux';
@@ -42,7 +44,15 @@ const DashboardPage: React.FC = () => {
   const router = useRouter();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 5} }),
+    useSensor(TouchSensor, {
+     
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    
   );
 
   useEffect(() => {
@@ -53,7 +63,7 @@ const DashboardPage: React.FC = () => {
             `${process.env.NEXT_PUBLIC_BACKEND_URL}todo/getalltodosbyuseremail/${session.user.email}/`
           );
           setTodos(response.data);
-          setFilteredTodos(response.data); // Initialize filteredTodos with the full list of todos
+          setFilteredTodos(response.data); 
         }
       } catch (error) {
         console.error('Error fetching todos:', error);
@@ -145,7 +155,7 @@ const DashboardPage: React.FC = () => {
             />
 
             <div className="flex space-x-4">
-              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={horizontalListSortingStrategy}>
                 <div
                   id="not-completed"
                   className={`w-1/2 p-4 rounded shadow ${
@@ -159,7 +169,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               </SortableContext>
 
-              <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+              <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={horizontalListSortingStrategy}>
                 <div
                   id="completed"
                   className={`w-1/2 p-4 rounded shadow ${
