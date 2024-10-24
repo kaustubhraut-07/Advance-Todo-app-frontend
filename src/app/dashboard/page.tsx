@@ -14,7 +14,7 @@ import {
   MouseSensor,
   useSensor,
   useSensors,
-  useDraggable, 
+  useDraggable,
   TouchSensor
 } from '@dnd-kit/core';
 import {
@@ -44,17 +44,18 @@ const DashboardPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { data: session } = useSession();
   const router = useRouter();
-  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: RootState) => {
+    console.log('isDarkMode:', state.theme.isDarkMode);
+    return state.theme.isDarkMode;
+  });
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5} }),
     useSensor(TouchSensor, {
-     
       activationConstraint: {
         delay: 250,
         tolerance: 5,
       },
     }),
-    
   );
 
   useEffect(() => {
@@ -65,7 +66,7 @@ const DashboardPage: React.FC = () => {
             `${process.env.NEXT_PUBLIC_BACKEND_URL}todo/getalltodosbyuseremail/${session.user.email}/`
           );
           setTodos(response.data);
-          setFilteredTodos(response.data); 
+          setFilteredTodos(response.data);
         }
       } catch (error) {
         console.error('Error fetching todos:', error);
@@ -127,12 +128,16 @@ const DashboardPage: React.FC = () => {
   const notCompletedTodos = filteredTodos.filter((todo) => !todo.completed);
   const completedTodos = filteredTodos.filter((todo) => todo.completed);
 
+  const containerClassName = `min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`;
+  console.log('Container class:', containerClassName);
+
   return (
     <>
+     <div className={`h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleOnDragEnd}>
-        <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
+        {/* <div className={containerClassName}> */}
           <ToastContainer />
-          <div className="container mx-auto px-4 py-8 h-screen">
+          <div className={`container mx-auto px-4 py-8 h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-2xl font-bold mb-4">Todos Dashboard</h1>
               <button
@@ -169,9 +174,7 @@ const DashboardPage: React.FC = () => {
                     <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
                   ))}
                 </div>
-              {/* </SortableContext> */}
 
-              {/* <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={rectSwappingStrategy}> */}
                 <div
                   id="completed"
                   className={`w-1/2 p-4 rounded shadow ${
@@ -186,8 +189,9 @@ const DashboardPage: React.FC = () => {
               </SortableContext>
             </div>
           </div>
-        </div>
+        {/* </div> */}
       </DndContext>
+      </div>
     </>
   );
 };
