@@ -19,7 +19,9 @@ import {
 } from '@dnd-kit/core';
 import {
   SortableContext,
-  verticalListSortingStrategy
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
+  rectSwappingStrategy
 } from '@dnd-kit/sortable';
 import SortableTodoItem from './SortableItem';
 import { useSelector } from 'react-redux';
@@ -155,7 +157,7 @@ const DashboardPage: React.FC = () => {
             />
 
             <div className="flex space-x-4">
-              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={rectSwappingStrategy}>
                 <div
                   id="not-completed"
                   className={`w-1/2 p-4 rounded shadow ${
@@ -167,9 +169,9 @@ const DashboardPage: React.FC = () => {
                     <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
                   ))}
                 </div>
-              </SortableContext>
+              {/* </SortableContext> */}
 
-              <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={verticalListSortingStrategy}>
+              {/* <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={rectSwappingStrategy}> */}
                 <div
                   id="completed"
                   className={`w-1/2 p-4 rounded shadow ${
