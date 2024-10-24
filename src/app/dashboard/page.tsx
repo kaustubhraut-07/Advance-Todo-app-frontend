@@ -162,7 +162,7 @@ const DashboardPage: React.FC = () => {
             />
 
             <div className="flex space-x-4">
-              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={rectSwappingStrategy}>
+              <SortableContext items={notCompletedTodos.map(todo => todo.id.toString())} strategy={horizontalListSortingStrategy}>
                 <div
                   id="not-completed"
                   className={`w-1/2 p-4 rounded shadow ${
@@ -175,6 +175,19 @@ const DashboardPage: React.FC = () => {
                   ))}
                 </div>
 
+                {/* <div
+                  id="completed"
+                  className={`w-1/2 p-4 rounded shadow ${
+                    isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'
+                  }`}
+                >
+                  <h2 className="text-xl font-bold mb-4">Completed</h2>
+                  {completedTodos.map((todo) => (
+                    <SortableTodoItem key={todo.id} todo={todo} onEdit={handleEdit} onDelete={handleDelete} />
+                  ))}
+                </div> */}
+              </SortableContext>
+                <SortableContext items={completedTodos.map(todo => todo.id.toString())} strategy={rectSwappingStrategy}>
                 <div
                   id="completed"
                   className={`w-1/2 p-4 rounded shadow ${
